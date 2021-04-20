@@ -1,0 +1,41 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: macros.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+
+{% macro pagecontrols(nid=None, cid=None, usid=None) %}
+<p>
+    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=1) }}" >&#9198;</a>
+    <span>  </span>  
+    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=page-1) }}" 
+     {% if page == 1 %} class="disabled" {% endif %} >&#9204;</a> 
+    <span>  </span>
+    Page <strong>{{ page }}</strong> of {{ pagination.get_page_count() }}
+    <span>  </span>
+    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=page+1) }}" 
+     {% if page == pagination.get_page_count() %} class="disabled" {% endif %} >&#9205;</a> 
+    <span>  </span>
+    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=pagination.get_page_count()) }}">&#9197;</a>
+    </p>
+{% endmacro %}
+
+{% macro td_or_none(val) %}
+<td {% if val is none %}class="none"{% endif %}>{{ val }}</td>
+{% endmacro %}
+
+{% macro dim_if_none(val) %}
+<div {% if val is none %}class="none"{% endif %}>{{ val }}</div>
+{% endmacro %}
+
+{% macro dim_if_zero(val) %}
+<div {% if (val is none) or (val==0) %}class="none"{% endif %}>{{ val }}</div>
+{% endmacro %}

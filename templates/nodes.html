@@ -1,0 +1,72 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: nodes.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+
+{% extends 'base.html' %}
+{% from 'macros.html' import pagecontrols with context %}
+{% from 'macros.html' import td_or_none with context %}
+{% from 'macros.html' import dim_if_none with context %}
+{% from 'macros.html' import dim_if_zero with context %}
+
+{% block title %}Nodes{% endblock %}
+
+{% block header %}
+  <h1>MySensors <strong>Nodes</strong></h1>
+{% endblock %}
+
+{% block content %}
+{{ pagecontrols() }}
+<table>
+  <tr">
+   <th class="th-id"><a href="{{ url_for(request.endpoint,sort='nid') }}">Node</a></th>
+   <th class="th-id">API</th>
+   <th >Sketch</th>
+   <!-- <th >Version</th> -->
+   <th >Revision</th>
+   <th >Location</th>
+   <th class="th-date"><a href="{{ url_for(request.endpoint,sort='date') }}">Last seen</a></th>   
+   <th >Days</th>
+   <th class="th-date"><a href="{{ url_for(request.endpoint,sort='battery') }}">Battery chg</a></th>   
+   <th >Months</th>
+   <th >Bat.level</th>
+  </tr>
+{% for entry in object_list %}
+<tr>
+  <td class="td-id">
+    <div class="dropdown">
+      <a class="dropbtn">{{ entry.nid }}</a>
+      <div class="dropdown-content">
+        <a href="{{ url_for('sensors',nid=entry.nid) }}">show sensors</a>
+        <a href="{{ url_for('tvalues',nid=entry.nid) }}">show current values</a>
+        <a href="{{ url_for('values',nid=entry.nid) }}">show all values</a>
+        <a href="{{ url_for('messages',nid=entry.nid) }}">show messages</a>
+        <a href="{{ url_for('confirm_new_battery', nid = entry.nid) }}">battery replaced</a>
+        <a href="{{ url_for('confirm_delete_node', nid = entry.nid) }}">delete node</a>
+      </div>
+    </div>
+  </td>
+  {{ td_or_none(entry.api_ver) }}
+  {{ td_or_none(entry.sk_name) }}
+  <!-- {{ td_or_none(entry.sk_version) }} -->
+  <td>{{ dim_if_zero(entry.sk_revision) }}</td>
+  <td class_"td-loc">{{ dim_if_none(entry.location) }}</td>
+  <td {% if days_ago(entry.lastseen) > 0 %} class="alert" {% endif %} >{{ entry.lastseen.strftime('%d.%m.%Y %H:%M') }}</td>
+  <td class="td-days">{{ days_ago(entry.lastseen) }}</td>
+  <td class="td-date">{{ entry.bat_changed.strftime('%d.%m.%Y') if entry.bat_changed is not none else "?" }}</td>
+  <td class="td-days">{{ dim_if_none( months_ago(entry.bat_changed) ) }}</td>
+  <td class="td-days">{{ dim_if_none( entry.level ) }}</td>
+</tr>
+{% endfor %}
+</table>
+{{ pagecontrols() }}
+{% endblock %}

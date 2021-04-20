@@ -1,0 +1,48 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: locations.html 922 2021-04-19 11:52:04Z  $
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+
+{% extends 'base.html' %}
+{% from 'macros.html' import pagecontrols with context %}
+{% from 'macros.html' import td_or_none with context %}
+{% from 'macros.html' import dim_if_none with context %}
+
+{% block title %}Locations{% endblock %}
+
+{% block header %}
+  <h1>MySensors <strong>Locations</strong></h1>
+{% endblock %}
+
+{% block content %}
+<p>
+    
+</p>
+<form action="" method="post">
+    <table style="width:50%;">
+        <tr>
+            <th class="th-id">Node</th>
+            <th >Sketch</th>
+            <th >Location</th>
+        </tr>
+    {% for entry in form.locs %}
+        <tr>
+            <td >{{ entry.nid }}</td>
+            {{ td_or_none(entry.sketch) }}
+            {{ td_or_none(entry.location) }}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <input type="submit" class="input submit modal-button" value="Update !" />
+</form>
+{% endblock %}

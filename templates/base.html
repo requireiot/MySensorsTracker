@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: base.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <title>{% block title %}{% endblock %} - MySensorsTracker</title>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <a href="/" class="navbar-brand">MySensors Dashboard</a>
+            <a href="{{ url_for('nodes') }}" class="navbar-item">Nodes</a>
+            <a href="{{ url_for('locations') }}" class="navbar-item">Locations</a>
+            <a href="{{ url_for('sensors') }}" class="navbar-item">Sensors</a>
+            <a href="{{ url_for('tvalues') }}" class="navbar-item">Current</a>
+            <a href="{{ url_for('values') }}" class="navbar-item">Values</a>
+            <a href="{{ url_for('messages') }}" class="navbar-item">Messages</a>
+        </div>
+        {% block header %}{% endblock %}
+    </header>
+    <div class="body-content">
+        {% block content %}{% endblock %}
+    </div>
+    <!--
+    <footer>
+        <p>Copyright &copy;2020 Bernd Waldmann. Built with <a href="https://palletsprojects.com/p/flask/">Flask</a>.</p>
+    </footer>
+    -->
+</body>
+</html>

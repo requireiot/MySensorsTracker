@@ -1,0 +1,231 @@
+/* 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: style.css 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+*/
+
+html,body { 
+    height: 100%;
+}
+
+header {
+    position: relative;
+    top: 0;
+    width: 100%;
+    height: 80px;
+}
+
+body {
+    display:flex; 
+    flex-direction:column; 
+    font-family: sans-serif; 
+    background: whitesmoke;   
+}
+
+a, h1, h2, th   { color: #1F618D; }
+
+h1 { 
+    font-family: sans-serif; 
+    border-bottom: 2px solid #eee; 
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+h2 { 
+    font-size: 1.2em; 
+}
+
+.body-content {
+    padding: 5px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* styles for NAVIGATION BAR at the top ------------ */
+
+.navbar {
+    background-color: #2471A3;
+    font-size: 1em;
+    font-family: sans-serif;
+    color: white;
+    padding: 8px 5px 8px 5px;    
+}
+
+.navbar a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navbar-brand {
+    font-size: 1.2em;
+    font-weight: 600;
+    padding: 8px 5px 8px 5px;
+}
+
+.navbar-item {
+    font-variant: small-caps;
+    margin-left: 30px;
+    padding: 7px 5px 7px 5px;
+}
+
+.navbar-item:hover {
+    background-color: #5499C7;
+}
+
+/* styles for TABLES -------------------------------------- */
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+table, th, td {
+    border: 1px solid rgb(180, 180, 180);
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    font-size: medium;
+}
+
+.th-id, .td-id {
+    text-align: center;
+    width: 4em;
+    padding-left: 0px;
+    padding-right: 0px;
+
+}
+
+.th-date, .td-date {
+    text-align: center;
+    width: 10em;
+}
+
+.td-days {
+    text-align: right;
+    width: 2em;
+}
+
+.td-value {
+    text-align: right;
+}
+
+.td-symbol {
+    text-align: left;
+    width: 8em;
+}
+
+.td-loc {
+    width: 8em;
+}
+
+tr:nth-child(even) {
+    background-color: #EAF2F8;
+}
+
+/* styles for SPECIAL contitions ---------------------..... */
+
+/* fields that read 'None' */
+.none {
+    color: darkgrey;
+}
+
+/* fields that deserve attention, e.g. date long ago */
+.alert {
+    color: red;
+}
+
+/* non-clickable hyperlink */
+
+.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
+}
+
+.text-right{
+    text-align: right;
+}
+
+/* styles for editable forms ------------------------------- */
+
+.edit-table {
+    width: 20em;
+    border: none;
+}
+
+.edit {
+    font-family: sans-serif; 
+    font-size: medium;
+}
+
+.edit-node {
+    text-align: right;
+    width: 3em;
+    /*padding: 5px;*/
+}
+
+.edit-date {
+    width: 8em;
+    /*padding: 5px;*/
+}
+
+.ro {
+    user-select: none; 
+    border: none;
+    padding: none;
+    background: transparent;
+}
+
+.modal-button {
+    padding: 8px 16px;
+    margin: 16px;
+    background-color: gainsboro;
+    font-family: sans-serif; 
+}
+
+/* styles for CONTEXT MENU -------------------------------- */
+
+.dropbtn {
+    padding: 8px;
+    border: none;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+  
+.dropdown-content {
+    display: none;
+    position: absolute; top:0.2em; left:2em;
+    background-color: #f1f1f1;
+    min-width: 300px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+  
+.dropdown-content a {
+    color: #2471A3;
+    padding: 4px 0.4em;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+  
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+  
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+  
+.dropdown:hover .dropbtn {
+    color: red;
+}

@@ -1,0 +1,51 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: batteries.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+
+{% extends 'base.html' %}
+{% from 'macros.html' import pagecontrols with context %}
+{% from 'macros.html' import td_or_none with context %}
+{% from 'macros.html' import dim_if_none with context %}
+
+{% block title %}Batteries{% endblock %}
+
+{% block header %}
+  <h1>MySensors <strong>Batteries</strong></h1>
+{% endblock %}
+
+{% block content %}
+<p>
+    
+</p>
+<form action="" method="post">
+    <table style="width:50%;">
+        <tr>
+            <th class="th-id">Node</th>
+            <th >Sketch</th>
+            <th >Location</th>
+            <th >Battery changed</th>
+            <th />
+        </tr>
+    {% for entry in form.bats %}
+        <tr>
+            <td >{{ entry.nid }}</td>
+            {{ td_or_none(entry.sketch) }}
+            {{ td_or_none(entry.location) }}
+            <td >{{ entry.bat_changed }}</td>
+            <td><button type="submit" name="today" value="{{ entry.nid.data }}" formaction="{{ url_for('battery_today',nid=entry.nid.data) }}">today</button></td>
+    {% endfor %}
+    </table>
+
+    <input type="submit" class="input submit modal-button" name="update" value="Update !"/>
+</form>
+{% endblock %}

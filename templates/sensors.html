@@ -1,0 +1,72 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: sensors.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+
+{% extends 'base.html' %}
+{% from 'macros.html' import pagecontrols with context %}
+{% from 'macros.html' import td_or_none with context %}
+{% from 'macros.html' import dim_if_none with context %}
+
+{% block title %}Sensors{% endblock %}
+
+{% block header %}
+  <h1>MySensors <strong>Sensors</strong>{% if nid %} for Node {{ nid }} {% endif %}</h1>
+{% endblock %}
+
+{% block content %}
+{{ pagecontrols() }}
+<table>
+  <tr">
+   <th class="th-id"><a href="{{ url_for(request.endpoint,sort='usid') }}">Node</a></th>
+   <th >Location</th>
+   <th class="th-id"><a href="{{ url_for(request.endpoint,sort='cid') }}">Sensor</a></th>
+   <th >Type</th>
+   <th>Description</th>
+   <th>Values</th>
+   <th class="th-date"><a href="{{ url_for(request.endpoint,sort='date') }}">Last seen</a></th>
+   <th >days</th>
+  </tr>
+{% for entry in object_list %}
+<tr>  
+  <td class="td-id">
+    <div class="dropdown">
+      <a class="dropbtn">{{ entry.nid }}</a>
+      <div class="dropdown-content">
+        <a href="{{ url_for('values', nid=entry.nid) }}">show values for this node</a>
+        <a href="{{ url_for('messages', nid=entry.nid) }}">show messages for this node</a>
+        <a href="{{ url_for('sensors',nid = entry.nid) }}">show only this node</a>
+        <a href="{{ url_for('sensors',nid = '-' ~ entry.nid) }}">show all but this node</a>         
+        <a href="{{ url_for('sensors') }}">show all nodes</a>
+      </div>
+    </div>
+  </td>
+  <td class="td-loc">{{ entry.nid.location }}</td>
+  <td class="td-id">
+    <div class="dropdown">
+      <a class="dropbtn">{{ entry.cid }}</a>
+      <div class="dropdown-content">
+        <a href="{{ url_for('tvalues', usid=entry.usid, nid=entry.nid, cid=entry.cid) }}">show current values</a>
+        <a href="{{ url_for('values', usid=entry.usid, nid=entry.nid, cid=entry.cid) }}">show all values</a>
+      </div>
+    </div>
+  </td>
+  <td class="td-symbol">{{ dim_if_none( sensor_string(entry.typ) ) }}</td>
+  {{ td_or_none(entry.name) }}
+  <td>{{ values_string(entry.values) }}</td>
+  <td class="td-date {% if days_ago(entry.lastseen) > 0 %}alert{% endif %}" >{{ entry.lastseen.strftime('%d.%m.%Y %H:%M') }}</td>
+  <td class="td-days">{{ days_ago(entry.lastseen) }}</td>
+</tr>
+{% endfor %}
+</table>
+{{ pagecontrols() }}
+{% endblock %}

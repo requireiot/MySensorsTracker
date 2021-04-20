@@ -1,0 +1,73 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: messages.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+
+{% extends 'base.html' %}
+{% from 'macros.html' import pagecontrols with context %}
+{% from 'macros.html' import td_or_none with context %}
+{% from 'macros.html' import dim_if_none with context %}
+
+{% block title %}Messages{% endblock %}
+
+{% block header %}
+  <h1>MySensors <strong>Messages</strong>
+    {% if usid %} for Sensor {{ nid }}:{{ cid }} 
+    {% elif nid %} for Node {{ nid }} 
+    {% elif cid %} for Sensor type {{ cid }} {% endif %}
+  </h1>
+{% endblock %}
+
+{% block content %}
+{{ pagecontrols(nid=nid, cid=cid, usid=usid) }}
+<table >
+  <tr">
+   <th class="th-id"><a href="{{ url_for(request.endpoint,sort='nid') }}">Node</a></th>
+   <th class="th-id"><a href="{{ url_for(request.endpoint,sort='cid') }}">Sensor</a></th>
+   <th class="th-id"><a href="{{ url_for(request.endpoint,sort='cmd') }}">Cmd</a></th>
+   <th>(symbol)</th>
+   <th class="th-id"><a href="{{ url_for(request.endpoint,sort='typ') }}">Type</a></th>
+   <th>(symbol)</th>
+   <th >Payload</th>
+   <th class="th-date"><a href="{{ url_for(request.endpoint,sort='date') }}">Received</a></th>
+  </tr>
+  {% for entry in object_list %}
+    <tr>
+      <td class="td-id">
+        <div class="dropdown">
+          <a class="dropbtn">{{ entry.nid }}</a>
+          <div class="dropdown-content">
+            <a href="{{ url_for(request.endpoint, nid = entry.nid) }}">show only this node</a>
+            <a href="{{ url_for(request.endpoint) }}">show all nodes</a>
+          </div>
+        </div>
+      </td>
+      <td class="td-id">
+        <div class="dropdown">
+          <a class="dropbtn">{{ entry.cid }}</a>
+          <div class="dropdown-content">
+            <a href="{{ url_for(request.endpoint, cid = entry.cid) }}">show only this sensor type</a>
+            <a href="{{ url_for(request.endpoint) }}">show all</a>
+          </div>
+        </div>
+      </td>
+      <td class="td-id">{{ entry.cmd }}</td>
+      <td class="td-symbol">{{ command_string(entry.cmd) }}</td>
+      <td class="td-id">{{ entry.typ }}</td>
+      <td class="td-symbol">{{ type_string(entry.cmd, entry.typ) }}</td>
+      {{ td_or_none(entry.payload) }}
+      <td class="td-date">{{ entry.received.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+    </tr>
+  {% endfor %}
+</table>
+{{ pagecontrols(nid=nid, cid=cid, usid=usid) }}
+{% endblock %}

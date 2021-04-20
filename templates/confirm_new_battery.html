@@ -1,0 +1,45 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: confirm_new_battery.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+{% extends 'base.html' %}
+
+{% block title %}Confirm new battery{% endblock %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+ 	<li>{ { message[1] }}</li>
+{% endfor %}</ul>
+{% endif %}
+{% endwith %}
+
+{% block content %}
+<h2>New battery</h2>
+<form action="" method="post">
+<div class="input">
+    <table class="edit-table">
+        <tr>
+            <td style="text-align: right;">{{ form.f_nid.label }}</td>
+            <td>{{ form.f_nid }}</td>
+        </tr>
+        <tr>
+            <td style="text-align: right;">{{ form.f_bat.label }}</td>
+            <td>{{ form.f_bat }}</td>
+        </tr>
+    </table>
+     
+    <input type="submit" class="input submit modal-button" value="Confirm !" />
+</div>
+</form>
+{% endblock %}
