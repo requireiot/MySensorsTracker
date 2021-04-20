@@ -1,4 +1,4 @@
-MySensorsTracker -- Tracker for MySensors messages
+Tracker for MySensors messages
 ===========================================
 
 I needed a simple tool for keeping track of all the MySensors nodes which I had built and deployed around the house over the years:
@@ -7,7 +7,7 @@ I needed a simple tool for keeping track of all the MySensors nodes which I had 
 * see at a glance if a sensor has crashed, i.e. has not sent any messages for, say, more than a day
 * is a sensor node sending strange messages?
 
-For a detailed description of the intended behavior of the app (i.e. the requirements specification), see `requirements.md` .
+For a detailed description of the intended behavior of the app (i.e. the requirements specification), see [requirements](requirements.md) .
 
 Prerequisites
 -------------
