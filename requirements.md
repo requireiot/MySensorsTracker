@@ -1,6 +1,6 @@
-__MyTracker__: MySensors dashboard
+__MySensorsTracker__: MySensors dashboard
 ==============================
-Requirements marked __OK__ are implemneted and tested. The rest is ideas for future versions.
+Requirements marked __OK__ are implemented and tested. The rest is ideas for future versions.
 
 # Use Cases
 

@@ -11,11 +11,13 @@ For a detailed description of the intended behavior of the app (i.e. the require
 
 Prerequisites
 -------------
-The **MySensorsTracker** app is written in Python 3. I have tested this both on my Microsoft Windows 10 development machine, and on a Debian 10 (Buster) Linux virtual server.
+The app assumes taht all MySensors messages are captured by an MQTT gateway, as described on the [MySensors website](https://www.mysensors.org/build/mqtt_gateway)
+
+The app is written in Python 3. I have tested this both on my Microsoft Windows 10 development machine, and on a Debian 10 (Buster) Linux virtual server.
 
 The app uses an Sqlite database.
 
-The app uses the **Peewee** library (see http://docs.peewee-orm.com/en/latest/#) to access the database, the **Flask** web framework (see https://palletsprojects.com/p/flask/), and the Eclipe Paho MQTT library (https://www.eclipse.org/paho/) to listen to the MQTT messages published by the MySensors gateways.
+The app uses the [**Peewee**](http://docs.peewee-orm.com/en/latest/#) library  to access the database, the [**Flask**](https://palletsprojects.com/p/flask/) web framework, and the [**Eclipe Paho**](https://www.eclipse.org/paho/) MQTT library to listen to the MQTT messages published by the MySensors gateways.
 
 On my virtual linux server that runs the app, I just did
 ```sh
