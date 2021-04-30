@@ -1,10 +1,6 @@
-__MySensorsTracker__: MySensors dashboard
-==============================
+__MySensorsTracker__: a MySensors dashboard
+---
 
-- [x] requirement is implemented and tested. 
-- [ ] requirement is not implemented or tested, ideas for future versions.
-
-- [__MySensorsTracker__: MySensors dashboard](#mysensorstracker-mysensors-dashboard)
 - [Use Cases](#use-cases)
 - [Requirements](#requirements)
   - [MQTT](#mqtt)
@@ -19,6 +15,10 @@ __MySensorsTracker__: MySensors dashboard
     - [Messages](#messages)
     - [Statistics](#statistics)
   - [Admin](#admin)
+
+Notation:
+- [x] requirement is implemented and tested. 
+- [ ] requirement is not implemented or tested, ideas for future versions.
 
 # Use Cases
 
