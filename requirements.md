@@ -4,6 +4,22 @@ __MySensorsTracker__: MySensors dashboard
 - [x] requirement is implemented and tested. 
 - [ ] requirement is not implemented or tested, ideas for future versions.
 
+- [__MySensorsTracker__: MySensors dashboard](#mysensorstracker-mysensors-dashboard)
+- [Use Cases](#use-cases)
+- [Requirements](#requirements)
+  - [MQTT](#mqtt)
+    - [Nodes](#nodes)
+    - [Sensors](#sensors)
+  - [UI, Input](#ui-input)
+  - [UI, Output](#ui-output)
+    - [Nodes](#nodes-1)
+    - [Sensors](#sensors-1)
+    - [Types and current values](#types-and-current-values)
+    - [Value messages](#value-messages)
+    - [Messages](#messages)
+    - [Statistics](#statistics)
+  - [Admin](#admin)
+
 # Use Cases
 
 `UC001` Overview of nodes: software version, sensors etc
