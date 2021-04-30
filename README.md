@@ -11,7 +11,7 @@ For a detailed description of the intended behavior of the app (i.e. the require
 
 Prerequisites
 -------------
-The app assumes taht all MySensors messages are captured by an MQTT gateway, as described on the [MySensors website](https://www.mysensors.org/build/mqtt_gateway)
+The app assumes that all MySensors messages are captured by an MQTT gateway, as described on the [MySensors website](https://www.mysensors.org/build/mqtt_gateway)
 
 The app is written in Python 3. I have tested this both on my Microsoft Windows 10 development machine, and on a Debian 10 (Buster) Linux virtual server.
 

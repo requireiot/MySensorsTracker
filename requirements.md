@@ -1,6 +1,8 @@
 __MySensorsTracker__: MySensors dashboard
 ==============================
-Requirements marked __OK__ are implemented and tested. The rest is ideas for future versions.
+
+- [x] requirement is implemented and tested. 
+- [ ] requirement is not implemented or tested, ideas for future versions.
 
 # Use Cases
 
@@ -16,143 +18,143 @@ Requirements marked __OK__ are implemented and tested. The rest is ideas for fut
 
 ## MQTT
 
-`R001` __OK__ capture all MQTT messages from MySensors nodes, store in database
+- [x] `R001` capture all MQTT messages from MySensors nodes, store in database
 
-`R002` __OK__ if same message is received multiple times, from different gateways, then ignore all but one
+- [x] `R002` if same message is received multiple times, from different gateways, then ignore all but one
 
-`R012` __OK__ capture time & date when message was received
+- [x] `R012` capture time & date when message was received
 
-`R013` capture which gateway received the message
+- [ ] `R013` capture which gateway received the message
 
 ### Nodes
 
-`R003` __OK__ capture information about nodes, from MQTT messages
-* `R003.1` __OK__ capture MySensors API version of node
-* `R003.2` __OK__ capture sketch name (sent by node via MySensors `sendSketchInfo()` function)
-* `R003.3` __OK__ capture sketch version string (sent by node via MySensors `sendSketchInfo()` function)
-* `R003.4` __OK__ capture sketch SVN revision, if available
-* `R003.5` __OK__ capture sensor description (sent by node via MySensors `present()` function)
-* `R003.6` __OK__ capture all values reported by sensors
-* `R003.7` __OK__ capture battery level reported by nodes
+- [x] `R003` capture information about nodes, from MQTT messages
+  - [x] `R003.1` capture MySensors API version of node
+  - [x] `R003.2` capture sketch name (sent by node via MySensors `sendSketchInfo()` function)
+  - [x] `R003.3` capture sketch version string (sent by node via MySensors `sendSketchInfo()` function)
+  - [x] `R003.4` capture sketch SVN revision, if available
+  - [x] `R003.5` capture sensor description (sent by node via MySensors `present()` function)
+  - [x] `R003.6` capture all values reported by sensors
+  - [x] `R003.7` capture battery level reported by nodes
 
 ### Sensors
-`R004` __OK__ capture information about sensors, from MQTT
-* `R004.1` __OK__ capture sensor description
-* `R004.2` __OK__ capture sensor type, e.g. S_DOOR
-* `R004.§` __OK__ capture which V_xxx value types a sensor has reported
+- [x] `R004` capture information about sensors, from MQTT
+  - [x] `R004.1` capture sensor description
+  - [x] `R004.2` capture sensor type, e.g. S_DOOR
+  - [x] `R004.§` capture which V_xxx value types a sensor has reported
 
 ## UI, Input
 
-`R005` __OK__ let user enter information about nodes
-* `R005.1` __OK__ let user indicate "battery changed today"
-* `R005.2` __OK__ let user enter date of last battery change
-* `R005.3` __OK__ let user enter location of node
+- [x] `R005` let user enter information about nodes
+  - [x] `R005.1` let user indicate "battery changed today"
+  - [x] `R005.2` let user enter date of last battery change
+  - [x] `R005.3` let user enter location of node
 
 ## UI, Output
 
 ### Nodes
 
-`R006` display on a web page information about all nodes
-* `R006.1` __OK__ display MySensors node ID
-* `R006.2` __OK__ display MySensors API version of firmware
-* `R006.3` __OK__ display sketch name
-* `R006.4` display sketch version string
-* `R006.5` __OK__ display sketch SVN revision, if available
-* `R006.7` __OK__ display timestamp of most recent message
-* `R006.6` __OK__ display date of last battery change
-* `R006.8` __OK__ display months alive since last battery change, if available
-* `R006.9` __OK__ display battery level
-* `R006.11` __OK__ display location of node
+- [ ] `R006` display on a web page information about all nodes
+  - [x] `R006.1` display MySensors node ID
+  - [x] `R006.2` display MySensors API version of firmware
+  - [x] `R006.3` display sketch name
+  - [ ] `R006.4` display sketch version string
+  - [x] `R006.5` display sketch SVN revision, if available
+  - [x] `R006.7` display timestamp of most recent message
+  - [x] `R006.6` display date of last battery change
+  - [x] `R006.8` display months alive since last battery change, if available
+  - [x] `R006.9` display battery level
+  - [x] `R006.11` display location of node
 
 ### Sensors
 
-`R007` __OK__ display on a web page information about all sensors
-* `R007.2` __OK__ display MySensors child ID
-* `R007.3` __OK__ display MySensors node ID
-* `R007.4` __OK__ display sensor type, such as S_DOOR
-* `R007.5` __OK__ display list of value types reported by sensor, such as V_TRIPPED
-* `R007.6` __OK__ display timestamp of most recent message
+- [x] `R007` display on a web page information about all sensors
+  - [x] `R007.2` display MySensors child ID
+  - [x] `R007.3` display MySensors node ID
+  - [x] `R007.4` display sensor type, such as S_DOOR
+  - [x] `R007.5` display list of value types reported by sensor, such as V_TRIPPED
+  - [x] `R007.6` display timestamp of most recent message
 
-`R020` filter content
-* `R020.1` __OK__ display all sensors
-* `R020.2` __OK__ display all sensors for one node
+- [x] `R020` filter content
+  - [x] `R020.1` display all sensors
+  - [x] `R020.2` display all sensors for one node
 
-`R019` navigate from this screen to other screens, with filtering
-* `R019.1` __OK__ offer to show all values for one node
-* `R019.2` __OK__ offer to show all messages for one node
-* `R019.3` __OK__ offer to show all values for one sensor instance
-* `R019.4` offer to show all values for one sensor type
+- [ ] `R019` navigate from this screen to other screens, with filtering
+  - [x] `R019.1` offer to show all values for one node
+  - [x] `R019.2` offer to show all messages for one node
+  - [x] `R019.3` offer to show all values for one sensor instance
+  - [ ] `R019.4` offer to show all values for one sensor type
 
 ### Types and current values
 
-`R018` __OK__ display on a web page information about all sensor types seen
-* `R018.1` __OK__ display either information for all sensors, or all sensors for one node
-* `R018.2` __OK__ display MySensors child ID
-* `R018.3` __OK__ display MySensors parent node ID
-* `R018.4` __OK__ display sensor type, such as S_DOOR
-* `R018.5` __OK__ display value type reported by sensor, such as V_TRIPPED
-* `R018.6` __OK__ display most recent value
-* `R018.8` __OK__ display timestamp of most recent message
+- [x] `R018` display on a web page information about all sensor types seen
+  - [x] `R018.1` display either information for all sensors, or all sensors for one node
+  - [x] `R018.2` display MySensors child ID
+  - [x] `R018.3` display MySensors parent node ID
+  - [x] `R018.4` display sensor type, such as S_DOOR
+  - [x] `R018.5` display value type reported by sensor, such as V_TRIPPED
+  - [x] `R018.6` display most recent value
+  - [x] `R018.8` display timestamp of most recent message
 
-`R017` allow user to select which types/values to display
-* `R017.1` __OK__ display all types/values for all sensors
-* `R017.2` __OK__ display types/values for one node
-* `R017.3` __OK__ display types/values for one sensor type
-* `R017.4` __OK__ display types/values for one sensor instance
+- [x] `R017` allow user to select which types/values to display
+  - [x] `R017.1` display all types/values for all sensors
+  - [x] `R017.2` display types/values for one node
+  - [x] `R017.3` display types/values for one sensor type
+  - [x] `R017.4` display types/values for one sensor instance
 
 ### Value messages
 
-`R008` display information about values reported by sensors
-* `R008.1` __OK__ display MySensors child ID
-* `R008.2` __OK__ display MySensors parent node ID
-* `R007.3` __OK__ display value type, such as V_STATUS
-* `R007.4` __OK__ display value text, as originally received
-* `R007.5` display value as number, if possible
-* `R007.6` __OK__ display timestamp when value was received
+- [ ] `R008` display information about values reported by sensors
+  - [x] `R008.1` display MySensors child ID
+  - [x] `R008.2` display MySensors parent node ID
+  - [x] `R007.3` display value type, such as V_STATUS
+  - [x] `R007.4` display value text, as originally received
+  - [ ] `R007.5` display value as number, if possible
+  - [x] `R007.6` display timestamp when value was received
 
-`R009` __OK__ allow user to select which values to display
-* `R009.1` __OK__ display all values for all sensors
-* `R009.2` __OK__ display values for one node
-* `R009.3` __OK__ display values for one sensor type
-* `R009.4` __OK__ display values for one sensor instance
+- [x] `R009` allow user to select which values to display
+  - [x] `R009.1` display all values for all sensors
+  - [x] `R009.2` display values for one node
+  - [x] `R009.3` display values for one sensor type
+  - [x] `R009.4` display values for one sensor instance
 
 ### Messages
 
-`R010` __OK__ display information about messages sent by nodes
-* `R010.1` __OK__ display MySensors node ID
-* `R010.2` __OK__ display MySensors child ID
-* `R010.3` __OK__ display MySensors command
-* `R010.4` __OK__ display MySensors command symbol like I_PRESENTATION
-* `R010.5` __OK__ display MySensors type
-* `R010.6` __OK__ display MySensors type symbol, such as V_STATUS
-* `R010.7` __OK__ display payload text, as originally received
-* `R010.8` __OK__ display timestamp when value was received
+- [x] `R010` display information about messages sent by nodes
+  - [x] `R010.1` display MySensors node ID
+  - [x] `R010.2` display MySensors child ID
+  - [x] `R010.3` display MySensors command
+  - [x] `R010.4` display MySensors command symbol like I_PRESENTATION
+  - [x] `R010.5` display MySensors type
+  - [x] `R010.6` display MySensors type symbol, such as V_STATUS
+  - [x] `R010.7` display payload text, as originally received
+  - [x] `R010.8` display timestamp when value was received
 
-`R011` __OK__ allow user to select which messages to display
-* `R011.1` __OK__ display all messages
-* `R011.2` __OK__ display messages for one node
-* `R011.3` __OK__ display messages for one sensor type
+- [x] `R011` allow user to select which messages to display
+  - [x] `R011.1` display all messages
+  - [x] `R011.2` display messages for one node
+  - [x] `R011.3` display messages for one sensor type
 
 ### Statistics
 
-`R014` display # of messages per node
-* `R014.1` display total # of messages per node
-* `R014.2` display # of messages per node, per day
-* `R014.3` display min,max,average interval between messages, per node
+- [ ] `R014` display # of messages per node
+  - [ ] `R014.1` display total # of messages per node
+  - [ ] `R014.2` display # of messages per node, per day
+  - [ ] `R014.3` display min,max,average interval between messages, per node
 
-`R015` display # of messages per sensor
-* `R015.1` display total # of messages per sensor
-* `R015.2` display # of messages per sensor, per day
-* `R015.3` display min,max,average interval between messages, per sensor
+- [ ] `R015` display # of messages per sensor
+  - [ ] `R015.1` display total # of messages per sensor
+  - [ ] `R015.2` display # of messages per sensor, per day
+  - [ ] `R015.3` display min,max,average interval between messages, per sensor
 
-`R021` display # of messages per V_xxx type per sensor instance
-* `R021.1` display total # of messages per V_xxx type per sensor instance
-* `R021.2` display # of messages per day, per V_xxx type per sensor instance
-* `R021.3` display min,max,average interval between messages, per V_xxx type per sensor instance
+- [ ] `R021` display # of messages per V_xxx type per sensor instance
+  - [ ] `R021.1` display total # of messages per V_xxx type per sensor instance
+  - [ ] `R021.2` display # of messages per day, per V_xxx type per sensor instance
+  - [ ] `R021.3` display min,max,average interval between messages, per V_xxx type per sensor instance
 
 ## Admin
 
-`R022` __OK__ allow to delete a node, and all sensors, values and messages that refer to it
+- [x] `R022` allow to delete a node, and all sensors, values and messages that refer to it
 
-`R023` allow to delete all messages and values older than a specified date
+- [ ] `R023` allow to delete all messages and values older than a specified date
 
