@@ -14,17 +14,17 @@
 
 {% macro pagecontrols(nid=None, cid=None, usid=None) %}
 <p>
-    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=1) }}" >&#9198;</a>
+    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=1) }}" style="font-size:2em;">&#9198;</a>  
     <span>  </span>  
     <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=page-1) }}" 
-     {% if page == 1 %} class="disabled" {% endif %} >&#9204;</a> 
+     {% if page == 1 %} class="disabled" {% endif %} style="font-size:2em;">&#9204;</a> 
     <span>  </span>
     Page <strong>{{ page }}</strong> of {{ pagination.get_page_count() }}
     <span>  </span>
     <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=page+1) }}" 
-     {% if page == pagination.get_page_count() %} class="disabled" {% endif %} >&#9205;</a> 
+     {% if page == pagination.get_page_count() %} class="disabled" {% endif %} style="font-size:2em;">&#9205;</a> 
     <span>  </span>
-    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=pagination.get_page_count()) }}">&#9197;</a>
+    <a href="{{ url_for(request.endpoint,sort=sort,nid=nid,cid=cid,usid=usid,page=pagination.get_page_count()) }}" style="font-size:2em;">&#9197;</a>
     </p>
 {% endmacro %}
 
