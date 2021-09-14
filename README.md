@@ -46,7 +46,7 @@ The Flask people recommend not to use the built-in server for a production envir
 
 Browse to http://*servername*:5000/nodes, and you should see the MySensorsTracker UI.
 
-Configuration
+Configuration 
 -------------
 In the `main` function in `app.py`, you need to adjust the MQTT server name and topic to subscribe to. 
 
