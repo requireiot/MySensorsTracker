@@ -1,0 +1,35 @@
+<!-- 
+    Author       : Bernd Waldmann
+    Created      : Sun Oct 27 23:01:35 2019
+
+    This Revision: $Id: confirm_delete_node.html 922 2021-04-19 11:52:04Z  $    
+
+    Copyright (C) 2019,2021 Bernd Waldmann
+
+    This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. 
+    If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+    SPDX-License-Identifier: MPL-2.0
+-->
+{% extends 'base.html' %}
+
+{% block title %}Confirm sensor deletion{% endblock %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+ 	<li>{ { message[1] }}</li>
+{% endfor %}</ul>
+{% endif %}
+{% endwith %}
+
+{% block content %}
+<form action="" method="post">
+<div class="input">
+    {{ form.f_nid.label }} {{ form.f_nid }}
+    {{ form.f_cid.label }} {{ form.f_cid }}
+    <input type="submit" class="input submit modal-button" value="Delete !" />
+</div>
+</form>
+{% endblock %}

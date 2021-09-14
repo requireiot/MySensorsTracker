@@ -3,7 +3,7 @@
 # @file          app.py
 # Author       : Bernd Waldmann
 # Created      : Sun Oct 27 23:01:35 2019
-# This Revision: $Id: app.py 921 2021-04-19 08:39:52Z  $
+# This Revision: $Id: app.py 1229 2021-08-05 09:34:20Z  $
 #
 # Tracker for MySensors messages, with web viewer
 
@@ -141,7 +141,7 @@ class Node(BaseModel):
     """
     nid         = IntegerField( primary_key=True,       help_text="MySensors node id")      # e.g. '109'
     sk_name     = CharField( max_length=25, null=True,  help_text="sketch name")            # e.g. 'MyWindowSensor'
-    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 921 $'
+    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1229 $'
     sk_revision = IntegerField( default=0,              help_text="sketch SVN rev")          
     api_ver     = CharField( max_length=25, null=True,  help_text="MySensors API version")  # e.g. '2.3.1'
     lastseen    = DateTimeField( default=datetime.now,  help_text="last message" )
@@ -302,6 +302,27 @@ def delete_node( nid ):
         applog.debug("{0} sensors removed".format(n))
         n = Node.delete().where(Node.nid==nid).execute()
         applog.debug("{0} nodes removed".format(n))
+
+##----------------------------------------------------------------------------
+
+def delete_sensor( nid, cid ):
+    """ delete a sensor, and all table rows that refer to it
+    Args:
+        nid (int): MySensors node ID
+        cid (int): MySensors child ID
+    """
+    usid = make_usid(nid,cid)
+    with db.atomic() as txn:
+        applog.info("Deleting node {0} sensor {1}".format( nid, cid ))
+
+        n = Message.delete().where( (Message.nid==nid) & (Message.cid==cid) ).execute()
+        applog.debug("{0} messages removed".format(n))
+
+        n = ValueType.delete().where(ValueType.usid==usid).execute()
+        applog.debug("{0} types removed".format(n))
+
+        n = Sensor.delete().where(Sensor.usid==usid).execute()
+        applog.debug("{0} sensors removed".format(n))
 
 #endregion
 ##############################################################################
@@ -800,12 +821,12 @@ def my_processor():
 ##############################################################################
 #region Forms
 
-class ConfirmDeleteForm(wtf.Form):
+class ConfirmDeleteNodeForm(wtf.Form):
     f_nid = wtf.IntegerField("Node ID:", render_kw={"class":"edit edit-node"})
 
     @app.route("/nodes/<int:nid>/delete", methods=['GET','POST'])
     def confirm_delete_node(nid):
-        form = ConfirmDeleteForm(request.form)
+        form = ConfirmDeleteNodeForm(request.form)
         # if POST, then use data from form
         if (request.method=='POST'):
             print ("Delete node {0}".format(request.form['f_nid']))
@@ -814,6 +835,26 @@ class ConfirmDeleteForm(wtf.Form):
         # else if GET, then display form
         form.f_nid.data = nid
         return render_template('confirm_delete_node.html', form=form )
+
+##----------------------------------------------------------------------------
+
+class ConfirmDeleteSensorForm(wtf.Form):
+    f_nid = wtf.IntegerField("Node ID:", render_kw={"class":"edit edit-node"})
+    f_cid = wtf.IntegerField("Sensor ID:", render_kw={"class":"edit edit-node"})
+
+    @app.route("/sensors/<int:usid>/delete", methods=['GET','POST'])
+    def confirm_delete_sensor(usid):
+        nid,cid = split_usid(usid)
+        form = ConfirmDeleteSensorForm(request.form)
+        # if POST, then use data from form
+        if (request.method=='POST'):
+            print ("Delete node {0} sensor {1}".format( request.form['f_nid'], request.form['f_cid'] ))
+            delete_sensor(nid,cid)
+            return redirect(url_for('sensors'))
+        # else if GET, then display form
+        form.f_nid.data = nid
+        form.f_cid.data = cid
+        return render_template('confirm_delete_sensor.html', form=form )
 
 ##----------------------------------------------------------------------------
 

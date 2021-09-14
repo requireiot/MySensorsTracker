@@ -2,7 +2,7 @@
     Author       : Bernd Waldmann
     Created      : Sun Oct 27 23:01:35 2019
 
-    This Revision: $Id: sensors.html 922 2021-04-19 11:52:04Z  $    
+    This Revision: $Id: sensors.html 1229 2021-08-05 09:34:20Z  $    
 
     Copyright (C) 2019,2021 Bernd Waldmann
 
@@ -57,6 +57,7 @@
       <div class="dropdown-content">
         <a href="{{ url_for('tvalues', usid=entry.usid, nid=entry.nid, cid=entry.cid) }}">show current values</a>
         <a href="{{ url_for('values', usid=entry.usid, nid=entry.nid, cid=entry.cid) }}">show all values</a>
+        <a href="{{ url_for('confirm_delete_sensor', usid=entry.usid) }}">delete sensor instance</a>
       </div>
     </div>
   </td>
