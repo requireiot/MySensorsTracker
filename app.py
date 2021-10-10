@@ -19,15 +19,21 @@
 # adjust these constants to your environment
 # in the author's setup, the topic is 'my/N/stat/...' where N is number of the gateway
 
-MQTT_BROKER = "ha-server"               # the name of your MQTT broker
-MQTT_TOPIC = "my/+/stat/#"              # the topic to subscribe to, includes wildcards
-MQTT_PATTERN = r'my\/\d+\/stat\/(.+)'   # regular expression to extract the interesting part of topic
+MQTT_IS_SECURE = True						# secure or not
+MQTT_PORT = 8883						# normal port 1883 or secure port 8883
+MQTT_BROKER = "your_server_name"					# the name of your MQTT broker
+MQTT_USERNAME = "your_username"						# your username
+MQTT_PASSWORD = "your_very_secret_password"				# your password
+MQTT_TOPIC = "my/+/stat/#"				# the topic to subscribe to, includes wildcards
+MQTT_TLS_CERT_PATH = "/etc/ssl/certs/ca-certificates.crt"	# Put here the path of your TLS cert
+MQTT_PATTERN = r'my\/\d+\/stat\/(.+)'			# regular expression to extract the interesting part of topic
 
 import sys,re,time,os
 import logging
 import logging.config
 from datetime import datetime
 import paho.mqtt.client as mqtt         # EPL 1.0 or EDPL 1.0
+import ssl
 from peewee import *                    # MIT license
 import flask                            # BSD license
 from flask import Flask,render_template,request,url_for,redirect
@@ -37,6 +43,8 @@ from playhouse.hybrid import hybrid_property
 import wtforms as wtf                   # BSD license
 
 import mysensors
+
+connected = False  # Stores the connection status
 
 ##############################################################################
 #region Logging
@@ -551,7 +559,8 @@ def nodes():
         query = query.order_by(Node.lastseen.desc())
     else:
         query = query.order_by(Node.nid)
-    return object_list('nodes.html', query.objects(), sort=sort )
+
+    return object_list('nodes.html', query.objects(), check_bounds=False, sort=sort )
 
 ##----------------------------------------------------------------------------
 
@@ -577,7 +586,7 @@ def sensors():
             query = query.where(Sensor.nid==nid)
         else:
             query = query.where(Sensor.nid!=-nid)
-    return object_list( 'sensors.html', query, sort=sort, nid=nid, cid=cid )
+    return object_list( 'sensors.html', query, check_bounds=False, sort=sort, nid=nid, cid=cid )
 
 ##----------------------------------------------------------------------------
 
@@ -615,7 +624,7 @@ def tvalues():
             query = query.where(ValueType.cid==icid)
         else:
             query = query.where(ValueType.cid!=-icid)
-    return object_list( 'types.html', query, sort=sort, nid=nid, cid=cid, usid=usid )
+    return object_list( 'types.html', query, check_bounds=False, sort=sort, nid=nid, cid=cid, usid=usid )
 
 ##----------------------------------------------------------------------------
 
@@ -654,7 +663,7 @@ def values():
             query = query.where(Message.cid==icid)
         else:
             query = query.where(Message.cid!=-icid)
-    return object_list( 'values.html', query, sort=sort, nid=nid, cid=cid, usid=usid )
+    return object_list( 'values.html', query, check_bounds=False, sort=sort, nid=nid, cid=cid, usid=usid )
 
 ##----------------------------------------------------------------------------
 
@@ -695,7 +704,7 @@ def messages():
         else:
             query = query.where(Message.cid!=-icid)
 
-    return object_list( 'messages.html', query, sort=sort, nid=nid, cid=cid, usid=usid )
+    return object_list( 'messages.html', query, check_bounds=False, sort=sort, nid=nid, cid=cid, usid=usid )
 
 ##----------------------------------------------------------------------------
 
@@ -964,6 +973,52 @@ class BatteriesForm(wtf.Form):
 #endregion
 #############################################################################
 
+'''
+Functions to process incoming messages
+'''
+
+def on_connect(client, userdata, flags, rc):
+    global connected  # Use global variable
+    if rc == 0:
+
+        applog.info("[INFO] Connected to broker")
+        connected = True  # Signal connection
+    else:
+        applog.info("[INFO] Error, connection failed")
+
+def connect(mqtt_client, mqtt_is_secure, mqtt_username, mqtt_password, broker_endpoint, port):
+    global connected
+
+    if not mqtt_client.is_connected():
+        mqtt_client.on_connect = on_connect
+        mqtt_client.on_message = on_message
+        if mqtt_is_secure:
+            mqtt_client.username_pw_set(mqtt_username, password=mqtt_password)
+            mqtt_client.tls_set(ca_certs=MQTT_TLS_CERT_PATH, certfile=None,
+                                keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
+                                tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+            mqtt_client.tls_insecure_set(False)
+
+        mqtt_client.connect(broker_endpoint, port=port, keepalive=60)
+        mqtt_client.subscribe(MQTT_TOPIC)
+        mqtt_client.loop_start()
+
+        attempts = 0
+
+        while not connected and attempts < 5:  # Wait for connection
+            applog.info(connected)
+            applog.info("[INFO] Attempting to connect...")
+            time.sleep(1)
+            attempts += 1
+
+    if not connected:
+        applog.info("[ERROR] Could not connect to broker")
+        return False
+
+    applog.info("[INFO] Listening to MQTT")
+
+    return True
+
 def main():
     db.init(os.path.join(APP_DIR, DATABASE_FILE))
     db.connect()
@@ -974,12 +1029,9 @@ def main():
     if ValueType.select().count()==0:
         fill_tvalues()
 
-    mqttc = mqtt.Client()
-    mqttc.on_message = on_message
-    mqttc.connect(MQTT_BROKER, 1883, 60)
-    mqttc.subscribe(MQTT_TOPIC)                   
-    mqttc.loop_start()
-    applog.info("listening to MQTT")
+    if not connect(mqtt.Client(), MQTT_IS_SECURE, MQTT_USERNAME,
+                   MQTT_PASSWORD, MQTT_BROKER, MQTT_PORT):
+        return False
 
     app.run( debug=True, use_reloader=False, host='0.0.0.0' )
 
