@@ -469,8 +469,9 @@ def on_node_presentation_message( nid, typ, val ):
     applog.debug("on_node_presentation_message( nid:%d typ:%d = '%s'", nid,typ,val)
     node = add_or_select_node(nid)
 
-    #  my/2/stat/123/255/0/0/17 2.3.1
-    if (typ==mysensors.Sensors.S_ARDUINO_NODE):
+    #  my/2/stat/123/255/0/0/17 2.3.1 (non repeater node)
+    #  my/2/stat/123/255/0/0/18 2.3.1 (repeater node)
+    if ((typ==mysensors.Sensors.S_ARDUINO_NODE) or (typ==mysensors.Sensors.S_ARDUINO_REPEATER_NODE)):
         node.api_ver = val   # update node API version in payload
         node.save() 
 
