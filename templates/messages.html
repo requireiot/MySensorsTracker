@@ -2,7 +2,7 @@
     Author       : Bernd Waldmann
     Created      : Sun Oct 27 23:01:35 2019
 
-    This Revision: $Id: messages.html 922 2021-04-19 11:52:04Z  $    
+    This Revision: $Id: messages.html 1282 2021-11-01 14:54:26Z  $    
 
     Copyright (C) 2019,2021 Bernd Waldmann
 
@@ -48,6 +48,7 @@
           <div class="dropdown-content">
             <a href="{{ url_for(request.endpoint, nid = entry.nid) }}">show only this node</a>
             <a href="{{ url_for(request.endpoint) }}">show all nodes</a>
+            <a href="{{ url_for('confirm_delete_old', ndays = 365) }}">delete old nodes</a>
           </div>
         </div>
       </td>

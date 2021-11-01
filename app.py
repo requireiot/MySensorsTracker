@@ -3,7 +3,7 @@
 # @file          app.py
 # Author       : Bernd Waldmann
 # Created      : Sun Oct 27 23:01:35 2019
-# This Revision: $Id: app.py 1229 2021-08-05 09:34:20Z  $
+# This Revision: $Id: app.py 1282 2021-11-01 14:54:26Z  $
 #
 # Tracker for MySensors messages, with web viewer
 
@@ -26,7 +26,7 @@ MQTT_PATTERN = r'my\/\d+\/stat\/(.+)'   # regular expression to extract the inte
 import sys,re,time,os
 import logging
 import logging.config
-from datetime import datetime
+from datetime import datetime,timedelta
 import paho.mqtt.client as mqtt         # EPL 1.0 or EDPL 1.0
 from peewee import *                    # MIT license
 import flask                            # BSD license
@@ -136,18 +136,20 @@ class BaseModel(Model):
     class Meta:
         database = db
 
+
 class Node(BaseModel):
     """ table describing MySensor nodes
     """
     nid         = IntegerField( primary_key=True,       help_text="MySensors node id")      # e.g. '109'
     sk_name     = CharField( max_length=25, null=True,  help_text="sketch name")            # e.g. 'MyWindowSensor'
-    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1229 $'
+    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1282 $'
     sk_revision = IntegerField( default=0,              help_text="sketch SVN rev")          
     api_ver     = CharField( max_length=25, null=True,  help_text="MySensors API version")  # e.g. '2.3.1'
     lastseen    = DateTimeField( default=datetime.now,  help_text="last message" )
     location    = CharField( max_length=32, null=True,  help_text="where in the house is it?")
     bat_changed = DateField( null=True,                 help_text="date of last battery change")
     bat_level   = IntegerField(null=True,               help_text="battery level in %")
+
 
 class Sensor(BaseModel):    
     """ table describing MySensor sensors, 
@@ -161,6 +163,7 @@ class Sensor(BaseModel):
     values      = BigBitField( null=True,               help_text="which V_xxx types have been seen")
     lastseen    = DateTimeField( default=datetime.now,  help_text="last message" )
 
+
 class ValueType(BaseModel):
     """ table describing a sensor sub-channel, as reported by type=V_xxx messages
         Each row is one V_xxx value type sent by one sensor on one node
@@ -172,6 +175,11 @@ class ValueType(BaseModel):
     typ         = IntegerField(                         help_text="MySensors value type")       # e.g. '2'=V_STATUS
     value       = CharField( max_length=25, null=True,  help_text="Current value")
     received    = DateTimeField( default=datetime.now,  help_text="timestamp" )
+
+    @hybrid_property
+    def timestamp(self):
+        return self.received.to_timestamp()
+
 
 class Message(BaseModel):
     """ table for all information contained in one MySensors message, as reported by gateway.
@@ -191,6 +199,11 @@ class Message(BaseModel):
     @hybrid_property
     def value(self):
         return self.payload
+
+    @hybrid_property
+    def timestamp(self):
+        return self.received.to_timestamp()
+        
 
 #endregion
 ##############################################################################
@@ -234,7 +247,7 @@ def add_or_select_tvalue(nid,cid,typ,val=None,dt=None):
         val (str): value string or None
         dt (datetime): timestamp or None
     Returns:
-        TypedValue:    instance
+        ValueType:    instance
     """
     tvalue, create = ValueType.get_or_create(
         uvid=make_uvid(nid,cid,typ),
@@ -323,6 +336,23 @@ def delete_sensor( nid, cid ):
 
         n = Sensor.delete().where(Sensor.usid==usid).execute()
         applog.debug("{0} sensors removed".format(n))
+
+##----------------------------------------------------------------------------
+
+def delete_old_stuff( ndays ):
+    """ delete everything older than `ndays` days 
+    Args:
+        ndays (int): no of days to keep
+    """
+    cutoff = (datetime.today()-timedelta(days=ndays)).timestamp()
+    applog.info("Deleting everything older than {0} days".format(ndays))
+
+    n = ValueType.delete().where( ValueType.timestamp < cutoff ).execute()
+    applog.info("{0} values removed".format(n))
+
+    n = Message.delete().where( Message.timestamp < cutoff ).execute()
+    applog.info("{0} messages removed".format(n))
+
 
 #endregion
 ##############################################################################
@@ -855,6 +885,25 @@ class ConfirmDeleteSensorForm(wtf.Form):
         form.f_nid.data = nid
         form.f_cid.data = cid
         return render_template('confirm_delete_sensor.html', form=form )
+
+##----------------------------------------------------------------------------
+
+class ConfirmDeleteOldForm(wtf.Form):
+    f_ndays = wtf.IntegerField("", render_kw={"class":"edit edit-node"})
+
+    @app.route("/messages/delete/<int:ndays>", methods=['GET','POST'])
+    def confirm_delete_old(ndays):
+        ndays = 365
+        form = ConfirmDeleteOldForm(request.form)
+        # if POST, then use data from form
+        if (request.method=='POST'):
+            ndays = int(request.form['f_ndays'])
+            print ("Delete records older than {0} days".format(ndays))
+            delete_old_stuff(ndays)
+            return redirect(url_for('nodes'))
+        # else if GET, then display form
+        form.f_ndays.data = ndays
+        return render_template('confirm_delete_old.html', form=form )
 
 ##----------------------------------------------------------------------------
 
