@@ -7,7 +7,9 @@ I needed a simple tool for keeping track of all the MySensors nodes which I had 
 * see at a glance if a sensor has crashed, i.e. has not sent any messages for, say, more than a day
 * is a sensor node sending strange messages?
 
-For a detailed description of the intended behavior of the app (i.e. the requirements specification), see [requirements](requirements.md) .
+For a detailed description of the intended behavior of the app (i.e. the requirements specification), see [requirements](requirements.md).
+
+This is part of my home automation setup. For an overview, see my [blog](https://requireiot.com/my-home-automation-story-part-1/).
 
 Prerequisites
 -------------

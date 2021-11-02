@@ -3,3 +3,4 @@
 /migrate_1_0_to_1_1.py
 /migrate_1_1_to_1_2.py
 /mysensors.db
+/__pycache__
