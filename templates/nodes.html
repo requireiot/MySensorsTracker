@@ -31,7 +31,7 @@
    <th class="th-id"><a href="{{ url_for(request.endpoint,sort='nid') }}">Node</a></th>
    <th class="th-id">API</th>
    <th >Sketch</th>
-   <!-- <th >Version</th> -->
+   <th >Version</th>
    <th >Revision</th>
    <th >Location</th>
    <th class="th-date"><a href="{{ url_for(request.endpoint,sort='date') }}">Last seen</a></th>   
@@ -57,7 +57,7 @@
   </td>
   {{ td_or_none(entry.api_ver) }}
   {{ td_or_none(entry.sk_name) }}
-  <!-- {{ td_or_none(entry.sk_version) }} -->
+  {{ td_or_none(entry.sk_version) }}
   <td>{{ dim_if_zero(entry.sk_revision) }}</td>
   <td class_"td-loc">{{ dim_if_none(entry.location) }}</td>
   <td {% if days_ago(entry.lastseen) > 0 %} class="alert" {% endif %} >{{ entry.lastseen.strftime('%d.%m.%Y %H:%M') }}</td>
