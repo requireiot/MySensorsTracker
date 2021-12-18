@@ -30,6 +30,8 @@ Notation:
 
 `UC003` Browse messages, detect any odd behavior of nodes
 
+`UC004` Database maintenance: delete obsolete information
+
 # Requirements
 
 ## MQTT
@@ -172,5 +174,6 @@ Notation:
 
 - [x] `R022` allow to delete a node, and all sensors, values and messages that refer to it
 
-- [ ] `R023` allow to delete all messages and values older than a specified date
+- [x] `R023` allow to delete all messages and values older than a specified date
+- [x] `R024` allow to delete all *requests* sent by a node (for nodes that frequently request values from the controller, or vice versa) 
 

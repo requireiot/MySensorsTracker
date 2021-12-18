@@ -2,7 +2,7 @@
     Author       : Bernd Waldmann
     Created      : Sun Oct 27 23:01:35 2019
 
-    This Revision: $Id: nodes.html 922 2021-04-19 11:52:04Z  $    
+    This Revision: $Id: nodes.html 1315 2021-12-18 10:12:43Z  $    
 
     Copyright (C) 2019,2021 Bernd Waldmann
 
@@ -51,6 +51,7 @@
         <a href="{{ url_for('values',nid=entry.nid) }}">show all values</a>
         <a href="{{ url_for('messages',nid=entry.nid) }}">show messages</a>
         <a href="{{ url_for('confirm_new_battery', nid = entry.nid) }}">battery replaced</a>
+        <a href="{{ url_for('confirm_delete_node_requests', nid = entry.nid) }}">delete requests from node</a>
         <a href="{{ url_for('confirm_delete_node', nid = entry.nid) }}">delete node</a>
       </div>
     </div>

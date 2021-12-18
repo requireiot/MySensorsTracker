@@ -3,7 +3,7 @@
 # @file          app.py
 # Author       : Bernd Waldmann
 # Created      : Sun Oct 27 23:01:35 2019
-# This Revision: $Id: app.py 1282 2021-11-01 14:54:26Z  $
+# This Revision: $Id: app.py 1315 2021-12-18 10:12:43Z  $
 #
 # Tracker for MySensors messages, with web viewer
 
@@ -142,7 +142,7 @@ class Node(BaseModel):
     """
     nid         = IntegerField( primary_key=True,       help_text="MySensors node id")      # e.g. '109'
     sk_name     = CharField( max_length=25, null=True,  help_text="sketch name")            # e.g. 'MyWindowSensor'
-    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1282 $'
+    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1315 $'
     sk_revision = IntegerField( default=0,              help_text="sketch SVN rev")          
     api_ver     = CharField( max_length=25, null=True,  help_text="MySensors API version")  # e.g. '2.3.1'
     lastseen    = DateTimeField( default=datetime.now,  help_text="last message" )
@@ -315,6 +315,18 @@ def delete_node( nid ):
         applog.debug("{0} sensors removed".format(n))
         n = Node.delete().where(Node.nid==nid).execute()
         applog.debug("{0} nodes removed".format(n))
+
+##----------------------------------------------------------------------------
+
+def delete_node_requests( nid ):
+    """ delete all request messages for this node
+    Args:
+        nid (int): MySensors node ID
+    """
+    with db.atomic() as txn:
+        applog.info("Deleting node requests {0}".format(nid))
+        n = Message.delete().where( (Message.nid==nid) & (Message.cmd == mysensors.Commands.C_REQ) ).execute()
+        applog.debug("{0} request messages removed".format(n))
 
 ##----------------------------------------------------------------------------
 
@@ -535,7 +547,7 @@ def on_message(mqttc, userdata, msg):
         cmd = int(path[2])
         typ = int(path[4])
         val = msg.payload.decode("utf-8")
-        applog.info("message nid:%d cid:%d cmd:%d typ:%d = '%s'",nid,cid,cmd,typ,val)
+        applog.debug("message nid:%d cid:%d cmd:%d typ:%d = '%s'",nid,cid,cmd,typ,val)
         add_message(nid,cid,cmd,typ,val)
 
         if (cmd==mysensors.Commands.C_SET and cid!=255):
@@ -885,6 +897,23 @@ class ConfirmDeleteSensorForm(wtf.Form):
         form.f_nid.data = nid
         form.f_cid.data = cid
         return render_template('confirm_delete_sensor.html', form=form )
+
+##----------------------------------------------------------------------------
+
+class ConfirmDeleteNodeRequestsForm(wtf.Form):
+    f_nid = wtf.IntegerField("Node ID:", render_kw={"class":"edit edit-node"})
+
+    @app.route("/nodes/<int:nid>/delete-requests", methods=['GET','POST'])
+    def confirm_delete_node_requests(nid):
+        form = ConfirmDeleteNodeRequestsForm(request.form)
+        # if POST, then use data from form
+        if (request.method=='POST'):
+            print ("Delete node {0} requests".format(request.form['f_nid']))
+            delete_node_requests(nid)
+            return redirect(url_for('nodes'))
+        # else if GET, then display form
+        form.f_nid.data = nid
+        return render_template('confirm_delete_node_req.html', form=form )
 
 ##----------------------------------------------------------------------------
 
