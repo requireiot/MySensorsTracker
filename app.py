@@ -3,7 +3,7 @@
 # @file          app.py
 # Author       : Bernd Waldmann
 # Created      : Sun Oct 27 23:01:35 2019
-# This Revision: $Id: app.py 1315 2021-12-18 10:12:43Z  $
+# This Revision: $Id: app.py 1364 2022-02-17 09:46:08Z  $
 #
 # Tracker for MySensors messages, with web viewer
 
@@ -19,9 +19,9 @@
 # adjust these constants to your environment
 # in the author's setup, the topic is 'my/N/stat/...' where N is number of the gateway
 
-MQTT_BROKER = "ha-server"               # the name of your MQTT broker
+MQTT_BROKER = "localhost"               # the name of your MQTT broker
 MQTT_TOPIC = "my/+/stat/#"              # the topic to subscribe to, includes wildcards
-MQTT_PATTERN = r'my\/\d+\/stat\/(.+)'   # regular expression to extract the interesting part of topic
+MQTT_PATTERN = r'my\/\w+\/stat\/(.+)'   # regular expression to extract the interesting part of topic
 
 import sys,re,time,os
 import logging
@@ -62,7 +62,7 @@ def init_logging():
             'console': {
                 'class': 'logging.StreamHandler',
                 'stream': 'ext://sys.stderr',
-                'formatter': 'brief',
+                'formatter': 'default',
             },
         },
         'loggers': {
@@ -71,7 +71,7 @@ def init_logging():
                 'handlers': ['wsgi','console']
             },
             'app': {
-                'level': logging.INFO,
+                'level': logging.DEBUG,
                 'handlers': ['console'],
             },
         },
@@ -142,7 +142,7 @@ class Node(BaseModel):
     """
     nid         = IntegerField( primary_key=True,       help_text="MySensors node id")      # e.g. '109'
     sk_name     = CharField( max_length=25, null=True,  help_text="sketch name")            # e.g. 'MyWindowSensor'
-    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1315 $'
+    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1364 $'
     sk_revision = IntegerField( default=0,              help_text="sketch SVN rev")          
     api_ver     = CharField( max_length=25, null=True,  help_text="MySensors API version")  # e.g. '2.3.1'
     lastseen    = DateTimeField( default=datetime.now,  help_text="last message" )
@@ -411,7 +411,6 @@ def on_value_message( nid,cid,typ,val ):
     
     tvalue = add_or_select_tvalue(nid,cid,typ,val,datetime.now())
     tvalue.save()
-    applog.debug("tvalue saved")
     
     applog.debug("on_value_message( nid:%d cid:%d typ:%d (%s) = '%s'", nid,cid,typ,valname,val)
 
@@ -833,7 +832,7 @@ def my_processor():
             int: number of days in the past
         """
         if dt is not None:
-            return round((dt.now()-dt).total_seconds()/(60*60*24))
+            return floor((dt.now()-dt).total_seconds()/(60*60*24))
         else:
             return None
 
@@ -1042,6 +1041,15 @@ class BatteriesForm(wtf.Form):
 #endregion
 #############################################################################
 
+def on_connect(client, userdata, flags, rc):
+    applog.info("MQTT: connected with result code "+str(rc))
+    if rc==0:
+        client.subscribe(MQTT_TOPIC)
+
+def on_disconnect(client, userdata,  rc):
+    applog.info("MQTT: disconnected")
+
+
 def main():
     db.init(os.path.join(APP_DIR, DATABASE_FILE))
     db.connect()
@@ -1052,10 +1060,13 @@ def main():
     if ValueType.select().count()==0:
         fill_tvalues()
 
+    #mqttc = mqtt.Client( client_id="mytracker" )
     mqttc = mqtt.Client()
+    #mqttc.enable_logger(applog)
     mqttc.on_message = on_message
-    mqttc.connect(MQTT_BROKER, 1883, 60)
-    mqttc.subscribe(MQTT_TOPIC)                   
+    mqttc.on_connect = on_connect
+    mqttc.on_disconnect = on_disconnect
+    mqttc.connect(MQTT_BROKER, 1883, keepalive=30)                  
     mqttc.loop_start()
     applog.info("listening to MQTT")
 

@@ -105,6 +105,7 @@ sensor_names = {
     37: "S_GAS",	        # Gas meter, V_FLOW, V_VOLUME
     38: "S_GPS",	        # GPS Sensor, V_POSITION
     39: "S_WATER_QUALITY",	# V_TEMP, V_PH, V_ORP, V_EC, V_STATUS
+   255: "(internal)"
 }
 
 class Values(IntEnum):
