@@ -3,7 +3,7 @@
 # @file          app.py
 # Author       : Bernd Waldmann
 # Created      : Sun Oct 27 23:01:35 2019
-# This Revision: $Id: app.py 1364 2022-02-17 09:46:08Z  $
+# This Revision: $Id: app.py 1685 2024-11-27 11:19:02Z  $
 #
 # Tracker for MySensors messages, with web viewer
 
@@ -19,11 +19,15 @@
 # adjust these constants to your environment
 # in the author's setup, the topic is 'my/N/stat/...' where N is number of the gateway
 
-MQTT_BROKER = "localhost"               # the name of your MQTT broker
+MQTT_BROKER = "ha-server"               # the name of your MQTT broker
 MQTT_TOPIC = "my/+/stat/#"              # the topic to subscribe to, includes wildcards
 MQTT_PATTERN = r'my\/\w+\/stat\/(.+)'   # regular expression to extract the interesting part of topic
+DATABASE_FILE = 'mysensors.db'
+DB_DIR = '/var/lib/mytracker/'
+REVISION = '$Id: app.py 1685 2024-11-27 11:19:02Z  $'
 
 import sys,re,time,os
+import math, json
 import logging
 import logging.config
 from datetime import datetime,timedelta
@@ -32,8 +36,10 @@ from peewee import *                    # MIT license
 import flask                            # BSD license
 from flask import Flask,render_template,request,url_for,redirect
 from playhouse.flask_utils import FlaskDB
-from playhouse.flask_utils import object_list
 from playhouse.hybrid import hybrid_property
+from playhouse.flask_utils import object_list
+from playhouse.migrate import *
+from playhouse.reflection import Introspector
 import wtforms as wtf                   # BSD license
 
 import mysensors
@@ -71,7 +77,7 @@ def init_logging():
                 'handlers': ['wsgi','console']
             },
             'app': {
-                'level': logging.DEBUG,
+                'level': logging.INFO,
                 'handlers': ['console'],
             },
         },
@@ -84,9 +90,10 @@ applog = init_logging()
 
 #endregion
 
-DATABASE_FILE = 'mysensors.db'
-APP_DIR = os.path.dirname(os.path.realpath(__file__))
-DATABASE_URI = 'sqlite:///%s' % os.path.join(APP_DIR, DATABASE_FILE)
+if not os.path.isdir(DB_DIR):
+    DB_DIR = os.path.dirname(os.path.realpath(__file__))
+DATABASE_URI = 'sqlite:///%s' % os.path.join(DB_DIR, DATABASE_FILE)
+applog.info('Using database at '+DB_DIR)
 
 app = Flask(__name__)
 app.config['FLASK_ENV'] = 'development'
@@ -142,13 +149,15 @@ class Node(BaseModel):
     """
     nid         = IntegerField( primary_key=True,       help_text="MySensors node id")      # e.g. '109'
     sk_name     = CharField( max_length=25, null=True,  help_text="sketch name")            # e.g. 'MyWindowSensor'
-    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1364 $'
+    sk_version  = CharField( max_length=25, null=True,  help_text="sketch version")         # e.g. '$Rev: 1685 $'
     sk_revision = IntegerField( default=0,              help_text="sketch SVN rev")          
     api_ver     = CharField( max_length=25, null=True,  help_text="MySensors API version")  # e.g. '2.3.1'
     lastseen    = DateTimeField( default=datetime.now,  help_text="last message" )
     location    = CharField( max_length=32, null=True,  help_text="where in the house is it?")
     bat_changed = DateField( null=True,                 help_text="date of last battery change")
     bat_level   = IntegerField(null=True,               help_text="battery level in %")
+    parent      = IntegerField(null=True,               help_text="parent node Id")
+    arc         = IntegerField(null=True,               help_text="ARC success rate")
 
 
 class Sensor(BaseModel):    
@@ -306,7 +315,7 @@ def delete_node( nid ):
         nid (int): MySensors node ID
     """
     with db.atomic() as txn:
-        applog.info("Deleting node {0}".format(nid))
+        applog.debug("Deleting node {0}".format(nid))
         n = Message.delete().where(Message.nid==nid).execute()
         applog.debug("{0} messages removed".format(n))
         n = ValueType.delete().where(ValueType.nid==nid).execute()
@@ -324,7 +333,7 @@ def delete_node_requests( nid ):
         nid (int): MySensors node ID
     """
     with db.atomic() as txn:
-        applog.info("Deleting node requests {0}".format(nid))
+        applog.debug("Deleting node requests {0}".format(nid))
         n = Message.delete().where( (Message.nid==nid) & (Message.cmd == mysensors.Commands.C_REQ) ).execute()
         applog.debug("{0} request messages removed".format(n))
 
@@ -338,7 +347,7 @@ def delete_sensor( nid, cid ):
     """
     usid = make_usid(nid,cid)
     with db.atomic() as txn:
-        applog.info("Deleting node {0} sensor {1}".format( nid, cid ))
+        applog.debug("Deleting node {0} sensor {1}".format( nid, cid ))
 
         n = Message.delete().where( (Message.nid==nid) & (Message.cid==cid) ).execute()
         applog.debug("{0} messages removed".format(n))
@@ -360,10 +369,10 @@ def delete_old_stuff( ndays ):
     applog.info("Deleting everything older than {0} days".format(ndays))
 
     n = ValueType.delete().where( ValueType.timestamp < cutoff ).execute()
-    applog.info("{0} values removed".format(n))
+    applog.debug("{0} values removed".format(n))
 
     n = Message.delete().where( Message.timestamp < cutoff ).execute()
-    applog.info("{0} messages removed".format(n))
+    applog.debug("{0} messages removed".format(n))
 
 
 #endregion
@@ -392,6 +401,48 @@ def add_message( nid,cid,cmd,typ,pay ):
 
 ##----------------------------------------------------------------------------
 
+def on_parent_message( nid,val ):
+    """ update parent field for a node
+    Args:
+        nid (int): MySensors node ID
+        val (string): payload
+    """
+    node = add_or_select_node(nid)       # make sure node exists
+    parent = int(val[8:].strip())
+    node.parent = parent
+    node.save()
+        
+    applog.debug("on_parent_message( nid:%d parent:%d'", nid,parent)
+
+##----------------------------------------------------------------------------
+
+def on_arc_message( nid,val ):
+    """ update arc field for a node
+    Args:
+        nid (int): MySensors node ID
+        val (string): payload like '{P:5460,R:3638,S:60}'
+    """
+    applog.info("on_arc_message( nid:%d ARC:'%s'", nid,val)
+
+    node = add_or_select_node(nid)       # make sure node exists
+    # convert "pseudo-JSON" like '{P:5460,R:3638,S:60}' to real JSON like '{"P":5460","R":3638","S":60}'
+    nojs = val
+    nojs=nojs.replace('{','{"')
+    nojs=nojs.replace(':','":')
+    nojs=nojs.replace(',',',"')
+    try:
+        js = json.loads(nojs)
+        success = js["S"]
+        node.arc = success
+        node.save()
+        applog.info("ARC success: %d%%", success)
+    except:
+        applog.warn("error in ARC message: '%s'", val)
+        pass
+        
+
+##----------------------------------------------------------------------------
+
 def on_value_message( nid,cid,typ,val ):
     """ add a record to 'values' table, for a sensor
     Args:
@@ -412,6 +463,14 @@ def on_value_message( nid,cid,typ,val ):
     tvalue = add_or_select_tvalue(nid,cid,typ,val,datetime.now())
     tvalue.save()
     
+    # my convention: message sensor=98, type=47 is a report on parent node
+    if (cid==98 and typ==47 and val.startswith('parent:')):
+        on_parent_message(nid,val)
+
+    # my convention: message sensor=98, type=28 (V_VAR5) is a report on ARC statistics, 
+    if (cid==98 and typ==28):
+        on_arc_message(nid,val)
+
     applog.debug("on_value_message( nid:%d cid:%d typ:%d (%s) = '%s'", nid,cid,typ,valname,val)
 
 ##----------------------------------------------------------------------------
@@ -503,7 +562,7 @@ def on_node_presentation_message( nid, typ, val ):
     node = add_or_select_node(nid)
 
     #  my/2/stat/123/255/0/0/17 2.3.1
-    if (typ==mysensors.Sensors.S_ARDUINO_NODE):
+    if (typ==mysensors.Sensors.S_ARDUINO_NODE or typ==mysensors.Sensors.S_ARDUINO_REPEATER_NODE):
         node.api_ver = val   # update node API version in payload
         node.save() 
 
@@ -570,7 +629,7 @@ def on_message(mqttc, userdata, msg):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', rev=REVISION[1:-1])
 
 ##----------------------------------------------------------------------------
 
@@ -832,7 +891,7 @@ def my_processor():
             int: number of days in the past
         """
         if dt is not None:
-            return floor((dt.now()-dt).total_seconds()/(60*60*24))
+            return math.floor((dt.now()-dt).total_seconds()/(60*60*24))
         else:
             return None
 
@@ -958,8 +1017,8 @@ class ConfirmNewBatteryForm(wtf.Form):
 
 class LocationForm(wtf.Form):
     nid = wtf.IntegerField("Node:", render_kw={"class":"td-id edit ro", "tabindex":-1 })
-    sketch = wtf.TextField("Sketch:", render_kw={"class":"edit ro", "tabindex":-1 })
-    location = wtf.TextField("Location:", render_kw={"class":"edit", })
+    sketch = wtf.StringField("Sketch:", render_kw={"class":"edit ro", "tabindex":-1 })
+    location = wtf.StringField("Location:", render_kw={"class":"edit", })
 
 class LocationsForm(wtf.Form):
     locs = wtf.FieldList(wtf.FormField(LocationForm))
@@ -973,12 +1032,12 @@ class LocationsForm(wtf.Form):
                 try:
                     node = Node.get(Node.nid==lf.nid.data)
                     if node.location != lf.location.data:
-                        applog.info("update %d location to '%s'",lf.nid.data, lf.location.data)
+                        applog.debug("update %d location to '%s'",lf.nid.data, lf.location.data)
                         node.location = lf.location.data
                         node.save()
                     elif lf.location.data is None or len(lf.location.data)==0:
                         node.location = None
-                        applog.info("update %d location to None",lf.nid.data)
+                        applog.debug("update %d location to None",lf.nid.data)
                         node.save()
                 except DoesNotExist:
                     print("Error: " + str(err))
@@ -999,8 +1058,8 @@ class LocationsForm(wtf.Form):
 
 class BatteryForm(wtf.Form):
     nid = wtf.IntegerField("Node:", render_kw={"class":"td-id edit ro", "tabindex":-1 })
-    sketch = wtf.TextField("Sketch:", render_kw={"class":"edit ro", "tabindex":-1 })
-    location = wtf.TextField("Location:", render_kw={"class":"edit ro", "tabindex":-1 })
+    sketch = wtf.StringField("Sketch:", render_kw={"class":"edit ro", "tabindex":-1 })
+    location = wtf.StringField("Location:", render_kw={"class":"edit ro", "tabindex":-1 })
     bat_changed = wtf.DateField("Date:", render_kw={"class":"edit edit-date"})
 
 class BatteriesForm(wtf.Form):
@@ -1015,12 +1074,12 @@ class BatteriesForm(wtf.Form):
                 try:
                     node = Node.get(Node.nid==lf.nid.data)
                     if node.bat_changed != lf.bat_changed.data:
-                        applog.info("update %d battery date to '%s'",lf.nid.data, lf.bat_changed.data)
+                        applog.debug("update %d battery date to '%s'",lf.nid.data, lf.bat_changed.data)
                         node.bat_changed = lf.bat_changed.data
                         node.save()
                     elif lf.bat_changed.data is None:
                         node.bat_changed = None
-                        applog.info("update %d battery date to None",lf.nid.data)
+                        applog.debug("update %d battery date to None",lf.nid.data)
                         node.save()
                 except DoesNotExist:
                     print("Error: " + str(err))
@@ -1051,22 +1110,47 @@ def on_disconnect(client, userdata,  rc):
 
 
 def main():
-    db.init(os.path.join(APP_DIR, DATABASE_FILE))
+    db.init(os.path.join(DB_DIR, DATABASE_FILE))
     db.connect()
     tables = [Node,Sensor,ValueType,Message]
     db.create_tables(tables)
     applog.info("opened database")
 
+    introspector = Introspector.from_database(db)
+    models = introspector.generate_models()
+    if ('node' in models):
+        print("Table 'node' exists")
+        dbnode = models['node']
+
+        hasp = hasattr(dbnode,'parent')
+        if (hasp):
+            print(" and it has a 'parent' field")
+        else:
+            print(" and it does NOT have a 'parent' field")
+            migrator = SqliteMigrator(db)
+            parent = IntegerField(null=True, help_text="parent node Id")
+            migrate( migrator.add_column('node', 'parent', parent), )
+            applog.info("Migration: add field 'parent'")
+
+        hasArc = hasattr(dbnode,'arc')
+        if (hasArc):
+            print(" and it has a 'arc' field")
+        else:
+            print(" and it does NOT have a 'arc' field")
+            migrator = SqliteMigrator(db)
+            arc = IntegerField(null=True, help_text="ARC success rate [%]")
+            migrate( migrator.add_column('node', 'arc', arc), )
+            applog.info("Migration: add field 'arc'")
+
     if ValueType.select().count()==0:
         fill_tvalues()
 
-    #mqttc = mqtt.Client( client_id="mytracker" )
     mqttc = mqtt.Client()
     #mqttc.enable_logger(applog)
     mqttc.on_message = on_message
     mqttc.on_connect = on_connect
     mqttc.on_disconnect = on_disconnect
-    mqttc.connect(MQTT_BROKER, 1883, keepalive=30)                  
+    mqttc.connect(MQTT_BROKER, 1883, keepalive=30)
     mqttc.loop_start()
     applog.info("listening to MQTT")
 

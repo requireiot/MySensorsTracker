@@ -2,7 +2,7 @@
     Author       : Bernd Waldmann
     Created      : Sun Oct 27 23:01:35 2019
 
-    This Revision: $Id: nodes.html 1315 2021-12-18 10:12:43Z  $    
+    This Revision: $Id: nodes.html 1682 2024-11-26 16:52:51Z  $    
 
     Copyright (C) 2019,2021 Bernd Waldmann
 
@@ -31,10 +31,11 @@
    <th class="th-id"><a href="{{ url_for(request.endpoint,sort='nid') }}">Node</a></th>
    <th class="th-id">API</th>
    <th >Sketch</th>
-   <!-- <th >Version</th> -->
    <th >Revision</th>
    <th >Location</th>
-   <th class="th-date"><a href="{{ url_for(request.endpoint,sort='date') }}">Last seen</a></th>   
+   <th >Parent</th>
+   <th >ARC</th>
+   <th class="th-datetime"><a href="{{ url_for(request.endpoint,sort='date') }}">Last seen</a></th>   
    <th >Days</th>
    <th class="th-date"><a href="{{ url_for(request.endpoint,sort='battery') }}">Battery chg</a></th>   
    <th >Months</th>
@@ -59,9 +60,11 @@
   {{ td_or_none(entry.api_ver) }}
   {{ td_or_none(entry.sk_name) }}
   <!-- {{ td_or_none(entry.sk_version) }} -->
-  <td>{{ dim_if_zero(entry.sk_revision) }}</td>
-  <td class_"td-loc">{{ dim_if_none(entry.location) }}</td>
-  <td {% if days_ago(entry.lastseen) > 0 %} class="alert" {% endif %} >{{ entry.lastseen.strftime('%d.%m.%Y %H:%M') }}</td>
+  <td class="td-days">{{ dim_if_zero(entry.sk_revision) }}</td>
+  <td class="td-loc">{{ dim_if_none(entry.location) }}</td>
+  <td class="td-days">{{ dim_if_none(entry.parent) }}</td>
+  <td class="td-days">{{ dim_if_none(entry.arc) }}</td>
+  <td class="td-datetime" {% if days_ago(entry.lastseen) > 0 %} class="alert" {% endif %} >{{ entry.lastseen.strftime('%d.%m.%Y %H:%M') }}</td>
   <td class="td-days">{{ days_ago(entry.lastseen) }}</td>
   <td class="td-date">{{ entry.bat_changed.strftime('%d.%m.%Y') if entry.bat_changed is not none else "?" }}</td>
   <td class="td-days">{{ dim_if_none( months_ago(entry.bat_changed) ) }}</td>

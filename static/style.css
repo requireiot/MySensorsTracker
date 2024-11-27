@@ -2,7 +2,7 @@
     Author       : Bernd Waldmann
     Created      : Sun Oct 27 23:01:35 2019
 
-    This Revision: $Id: style.css 1229 2021-08-05 09:34:20Z  $    
+    This Revision: $Id: style.css 1682 2024-11-26 16:52:51Z  $    
 
     Copyright (C) 2019,2021 Bernd Waldmann
 
@@ -103,7 +103,12 @@ table, th, td {
 
 .th-date, .td-date {
     text-align: center;
-    width: 10em;
+    width: 6em;
+}
+
+.th-datetime, .td-datetime {
+    text-align: center;
+    width: 9em;
 }
 
 .td-days {
@@ -121,7 +126,7 @@ table, th, td {
 }
 
 .td-loc {
-    width: 8em;
+    /* width: 10em; */
 }
 
 tr:nth-child(even) {

@@ -2,7 +2,7 @@
     Author       : Bernd Waldmann
     Created      : Sun Oct 27 23:01:35 2019
 
-    This Revision: $Id: types.html 922 2021-04-19 11:52:04Z  $    
+    This Revision: $Id: types.html 1682 2024-11-26 16:52:51Z  $    
 
     Copyright (C) 2019,2021 Bernd Waldmann
 
@@ -37,7 +37,7 @@
    <th >Sensor Type</th>
    <th >Value Type</th>
    <th >Value</th>
-   <th class="th-date"><a href="{{ url_for(request.endpoint,sort='date',nid=nid,cid=cid,usid=usid) }}">Received</a></th>
+   <th class="th-datetime"><a href="{{ url_for(request.endpoint,sort='date',nid=nid,cid=cid,usid=usid) }}">Received</a></th>
   </tr>
   {% for entry in object_list %}
     <tr>
@@ -66,7 +66,7 @@
       <td class="td-symbol">{{ dim_if_none( sensor_string(entry.usid.typ) ) }}</td>
       <td class="td-symbol">{{ dim_if_none( value_string(entry.typ) ) }}</td>
       <td class="td-value">{{ dim_if_none(entry.value) }}</td>
-      <td class="td-date">{{ entry.received.strftime('%d.%m.%Y %H:%M') }}</td>
+      <td class="td-datetime">{{ entry.received.strftime('%d.%m.%Y %H:%M') }}</td>
     </tr>
   {% endfor %}
 </table>

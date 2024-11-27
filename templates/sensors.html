@@ -2,7 +2,7 @@
     Author       : Bernd Waldmann
     Created      : Sun Oct 27 23:01:35 2019
 
-    This Revision: $Id: sensors.html 1229 2021-08-05 09:34:20Z  $    
+    This Revision: $Id: sensors.html 1682 2024-11-26 16:52:51Z  $    
 
     Copyright (C) 2019,2021 Bernd Waldmann
 
@@ -33,7 +33,7 @@
    <th >Type</th>
    <th>Description</th>
    <th>Values</th>
-   <th class="th-date"><a href="{{ url_for(request.endpoint,sort='date') }}">Last seen</a></th>
+   <th class="th-datetime"><a href="{{ url_for(request.endpoint,sort='date') }}">Last seen</a></th>
    <th >days</th>
   </tr>
 {% for entry in object_list %}
@@ -64,7 +64,7 @@
   <td class="td-symbol">{{ dim_if_none( sensor_string(entry.typ) ) }}</td>
   {{ td_or_none(entry.name) }}
   <td>{{ values_string(entry.values) }}</td>
-  <td class="td-date {% if days_ago(entry.lastseen) > 0 %}alert{% endif %}" >{{ entry.lastseen.strftime('%d.%m.%Y %H:%M') }}</td>
+  <td class="td-datetime {% if days_ago(entry.lastseen) > 0 %}alert{% endif %}" >{{ entry.lastseen.strftime('%d.%m.%Y %H:%M') }}</td>
   <td class="td-days">{{ days_ago(entry.lastseen) }}</td>
 </tr>
 {% endfor %}
